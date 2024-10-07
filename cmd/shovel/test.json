@@ -1,0 +1,58 @@
+{
+    "pg_url": "postgres:///shovel",
+    "eth_sources": [
+      {
+          "name": "Sepolia",
+          "chain_id": 11155111,
+          "urls": ["https://ethereum-sepolia-rpc.publicnode.com"]
+      }, 
+      {
+        "name": "Holesky",
+        "chain_id": 17000,
+        "urls": ["https://ethereum-holesky-rpc.publicnode.com"]
+      }
+    ],
+    "integrations": [{
+      "name": "ramping",
+      "enabled": true,
+      "sources": [{"name": "Sepolia"}, {"name": "Holesky"}],
+      "table": {
+        "name": "ramping",
+        "columns": [
+          {"name": "chain_id", "type": "numeric"},
+          {"name": "log_addr", "type": "bytea"},
+          {"name": "block_time", "type": "numeric"},
+          {"name": "tx_hash", "type": "bytea"},
+          {"name": "from", "type": "bytea"},
+          {"name": "to", "type": "bytea"},
+          {"name": "value", "type": "numeric"},
+          {"name": "status", "type": "bool"},
+          {"name": "type", "type": "bool"}
+        ]
+      },
+      "block": [
+        {"name": "chain_id", "column": "chain_id"},
+        {"name": "block_time", "column": "block_time"},
+        {"name": "tx_hash", "column": "tx_hash"},
+        {
+          "name": "log_addr",
+          "column": "log_addr",
+          "filter_op": "contains",
+          "filter_arg": []  
+        }
+      ],
+      "event": {
+        "name": "RampIntent",
+        "type": "event",
+        "anonymous": false,
+        "inputs": [
+          {"indexed": true, "name": "from", "type": "address", "column": "from"},
+          {"indexed": true, "name": "to", "type": "address", "column": "to"},
+          {"name": "amount", "type": "uint256", "column": "value"},
+          {"name": "status", "type": "bool", "column": "status"},
+          {"name": "type", "type": "bool", "column": "type"}
+        ]
+      }
+    }]
+  }
+  

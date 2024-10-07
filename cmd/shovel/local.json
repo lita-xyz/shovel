@@ -1,0 +1,115 @@
+{
+    "pg_url": "postgres:///shovel",
+    "eth_sources": [
+      {
+          "name": "local",
+          "chain_id": 31337,
+          "urls": ["http://127.0.0.1:8545"]
+      }
+    ],
+    "integrations": [{
+      "name": "EscrowRefunded",
+      "enabled": true,
+      "sources": [{"name": "local"}],
+      "table": {
+        "name": "escrow",
+        "columns": [
+          {"name": "chain_id", "type": "numeric"},
+          {"name": "log_addr", "type": "bytea"},
+          {"name": "block_time", "type": "numeric"},
+          {"name": "to", "type": "bytea"},
+          {"name": "value", "type": "numeric"}
+        ]
+      },
+      "block": [
+        {"name": "chain_id", "column": "chain_id"},
+        {"name": "block_time", "column": "block_time"},
+        {
+          "name": "log_addr",
+          "column": "log_addr",
+          "filter_op": "contains",
+          "filter_arg": ["5FbDB2315678afecb367f032d93F642f64180aa3"]  
+        }
+      ],
+      "event": {
+        "name": "EscrowRefunded",
+        "type": "event",
+        "anonymous": false,
+        "inputs": [
+          {"indexed": true, "name": "user", "type": "address", "column": "to"},
+          {"name": "amount", "type": "uint256", "column": "value"}
+        ]
+      }
+    }, 
+    {
+      "name": "OffRampIntentCreated",
+      "enabled": true,
+      "sources": [{"name": "local"}],
+      "table": {
+        "name": "intent",
+        "columns": [
+          {"name": "chain_id", "type": "numeric"},
+          {"name": "log_addr", "type": "bytea"},
+          {"name": "block_time", "type": "numeric"},
+          {"name": "from", "type": "bytea"},
+          {"name": "value", "type": "numeric"}
+        ]
+      },
+      "block": [
+        {"name": "chain_id", "column": "chain_id"},
+        {"name": "block_time", "column": "block_time"},
+        {
+          "name": "log_addr",
+          "column": "log_addr",
+          "filter_op": "contains",
+          "filter_arg": ["5FbDB2315678afecb367f032d93F642f64180aa3"]  
+        }
+      ],
+      "event": {
+        "name": "OffRampIntentCreated",
+        "type": "event",
+        "anonymous": false,
+        "inputs": [
+          {"indexed": true, "name": "user", "type": "address", "column": "from"},
+          {"name": "amount", "type": "uint256", "column": "value"}
+        ]
+      }
+    }, 
+    {
+      "name": "FundsReleased",
+      "enabled": true,
+      "sources": [{"name": "local"}],
+      "table": {
+        "name": "release",
+        "columns": [
+          {"name": "chain_id", "type": "numeric"},
+          {"name": "log_addr", "type": "bytea"},
+          {"name": "block_time", "type": "numeric"},
+          {"name": "from", "type": "bytea"},
+          {"name": "to", "type": "bytea"},
+          {"name": "value", "type": "numeric"}
+        ]
+      },
+      "block": [
+        {"name": "chain_id", "column": "chain_id"},
+        {"name": "block_time", "column": "block_time"},
+        {
+          "name": "log_addr",
+          "column": "log_addr",
+          "filter_op": "contains",
+          "filter_arg": ["5FbDB2315678afecb367f032d93F642f64180aa3"]  
+        }
+      ],
+      "event": {
+        "name": "FundsReleased",
+        "type": "event",
+        "anonymous": false,
+        "inputs": [
+          {"indexed": true, "name": "offRamperAddress", "type": "address", "column": "from"},
+          {"indexed": true, "name": "onRamperAddress", "type": "address", "column": "to"},
+          {"name": "releaseAmount", "type": "uint256", "column": "value"}
+        ]
+      }
+    }]
+  }
+  

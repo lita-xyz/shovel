@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	npprof "net/http/pprof"
 	"os"
 	"runtime/debug"
 	"runtime/pprof"
@@ -18,7 +17,7 @@ import (
 
 	"github.com/indexsupply/shovel/shovel"
 	"github.com/indexsupply/shovel/shovel/config"
-	"github.com/indexsupply/shovel/shovel/web"
+	"github.com/indexsupply/shovel/shovel/sdk"
 	"github.com/indexsupply/shovel/wctx"
 	"github.com/indexsupply/shovel/wos"
 	"github.com/indexsupply/shovel/wpg"
@@ -152,35 +151,36 @@ func main() {
 	var (
 		pbuf bytes.Buffer
 		mgr  = shovel.NewManager(ctx, pg, conf)
-		wh   = web.New(mgr, &conf, pg)
+		wh   = sdk.New(mgr, &conf, pg)
 	)
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", wh.Index)
-	mux.HandleFunc("/diag", wh.Diag)
-	mux.HandleFunc("/metrics", wh.Prom)
-	mux.HandleFunc("/login", wh.Login)
-	mux.Handle("/task-updates", wh.Authn(wh.Updates))
-	mux.Handle("/add-source", wh.Authn(wh.AddSource))
-	mux.Handle("/save-source", wh.Authn(wh.SaveSource))
-	mux.Handle("/add-integration", wh.Authn(wh.AddIntegration))
-	mux.Handle("/save-integration", wh.Authn(wh.SaveIntegration))
-	mux.HandleFunc("/debug/pprof/", npprof.Index)
-	mux.HandleFunc("/debug/pprof/cmdline", npprof.Cmdline)
-	mux.HandleFunc("/debug/pprof/profile", npprof.Profile)
-	mux.HandleFunc("/debug/pprof/symbol", npprof.Symbol)
-	mux.HandleFunc("/debug/pprof/trace", npprof.Trace)
-	mux.HandleFunc("/debug/pprof/capture", func(w http.ResponseWriter, r *http.Request) {
-		w.Write(pbuf.Bytes())
-	})
+	mux.HandleFunc("/records", wh.Records)
+	// mux.HandleFunc("/", wh.Index)
+	// mux.HandleFunc("/diag", wh.Diag)
+	// mux.HandleFunc("/metrics", wh.Prom)
+	// mux.HandleFunc("/login", wh.Login)
+	// mux.Handle("/task-updates", wh.Authn(wh.Updates))
+	// mux.Handle("/add-source", wh.Authn(wh.AddSource))
+	// mux.Handle("/save-source", wh.Authn(wh.SaveSource))
+	// mux.Handle("/add-integration", wh.Authn(wh.AddIntegration))
+	// mux.Handle("/save-integration", wh.Authn(wh.SaveIntegration))
+	// mux.HandleFunc("/debug/pprof/", npprof.Index)
+	// mux.HandleFunc("/debug/pprof/cmdline", npprof.Cmdline)
+	// mux.HandleFunc("/debug/pprof/profile", npprof.Profile)
+	// mux.HandleFunc("/debug/pprof/symbol", npprof.Symbol)
+	// mux.HandleFunc("/debug/pprof/trace", npprof.Trace)
+	// mux.HandleFunc("/debug/pprof/capture", func(w http.ResponseWriter, r *http.Request) {
+	// 	w.Write(pbuf.Bytes())
+	// })
 	go http.ListenAndServe(listen, log(true, mux))
 
 	if profile == "cpu" {
 		check(pprof.StartCPUProfile(&pbuf))
 	}
 
-	go func() {
-		check(wh.PushUpdates())
-	}()
+	// go func() {
+	// 	check(wh.PushUpdates())
+	// }()
 
 	go func() {
 		for {
