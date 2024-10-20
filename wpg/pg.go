@@ -40,8 +40,14 @@ func TestPG(tb testing.TB, schema string) *pgxpool.Pool {
 }
 
 type Column struct {
-	Name string `db:"column_name"json:"name"`
-	Type string `db:"data_type"json:"type"`
+	Name string `db:"column_name" json:"name"`
+	Type string `db:"data_type" json:"type"`
+}
+
+type ForeignKey struct {
+	RefCol   string `json:"ref_col"`
+	Col      string `json:"col"`
+	RefTable string `json:"ref_table"`
 }
 
 func quote(s string) string {
@@ -55,9 +61,11 @@ type Table struct {
 	Name    string   `json:"name"`
 	Columns []Column `json:"columns"`
 
-	DisableUnique bool       `json:"disable_unique"`
-	Unique        [][]string `json:"unique"`
-	Index         [][]string `json:"index"`
+	DisableUnique bool         `json:"disable_unique"`
+	Unique        [][]string   `json:"unique"`
+	Index         [][]string   `json:"index"`
+	Properties    [][]string   `json:"properties,omitempty"`
+	ForeignKeys   []ForeignKey `json:"foreign_key,omitempty"`
 }
 
 func (t Table) DDL() []string {
@@ -116,6 +124,18 @@ func (t Table) DDL() []string {
 			createIndex += ", "
 		}
 		res = append(res, createIndex)
+	}
+
+	for _, fkey := range t.ForeignKeys {
+		createFK := fmt.Sprintf(
+			"alter table %s add constraint f_%s foreign key (%s) references %s(%s)",
+			t.Name,
+			fkey.Col,
+			fkey.Col,
+			fkey.RefTable,
+			fkey.RefCol,
+		)
+		res = append(res, createFK)
 	}
 
 	return res
