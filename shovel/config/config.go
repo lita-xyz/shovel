@@ -23,6 +23,7 @@ type Root struct {
 	Sources      []Source      `json:"eth_sources"`
 	Integrations []Integration `json:"integrations"`
 	Additional   []wpg.Table   `json:"additional"`
+	Clean        Quota         `json:"clean"`
 }
 
 func union(a, b wpg.Table) wpg.Table {
@@ -429,6 +430,13 @@ type Compiled struct {
 	Config json.RawMessage `json:"config"`
 }
 
+type Quota struct {
+	Day    uint `json:"day"`
+	Hour   uint `json:"hour"`
+	Minute uint `json:"minute"`
+	Second uint `json:"second"`
+}
+
 type Integration struct {
 	Name         string           `json:"name"`
 	Enabled      bool             `json:"enabled"`
@@ -439,6 +447,7 @@ type Integration struct {
 	Compiled     Compiled         `json:"compiled"`
 	Block        []dig.BlockData  `json:"block"`
 	Event        dig.Event        `json:"event"`
+	Cross        []wpg.Cross      `json:"cross,omitempty"`
 	Dependencies []string
 }
 

@@ -50,6 +50,13 @@ type ForeignKey struct {
 	RefTable string `json:"ref_table"`
 }
 
+type Cross struct {
+	CrossTable string `json:"cross_table"`
+	Col        string `json:"col"`
+	Task       string `json:"task"`
+	RefCol     string `json:"ref_col"`
+}
+
 func quote(s string) string {
 	if _, ok := reservedWords[strings.ToLower(s)]; ok {
 		return strconv.Quote(s)
@@ -134,7 +141,7 @@ func (t Table) DDL() []string {
 		)
 		res = append(res, createFK)
 		createFK = fmt.Sprintf(
-			"alter table %s add constraint f_%s foreign key (%s) references %s(%s)",
+			"alter table %s add constraint f_%s foreign key (%s) references %s(%s) on delete cascade",
 			t.Name,
 			fkey.Col,
 			fkey.Col,

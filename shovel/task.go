@@ -122,7 +122,7 @@ func NewDestination(ig config.Integration) (Destination, error) {
 		}
 		return dest, nil
 	default:
-		dest, err := dig.New(ig.Name, ig.Event, ig.Block, ig.Table, ig.Notification, ig.FilterAGG)
+		dest, err := dig.New(ig.Name, ig.Event, ig.Block, ig.Table, ig.Cross, ig.Notification, ig.FilterAGG)
 		if err != nil {
 			return nil, fmt.Errorf("building abi integration: %w", err)
 		}
@@ -837,4 +837,18 @@ func loadTasks(ctx context.Context, pgp *pgxpool.Pool, c config.Root) ([]*Task, 
 		}
 	}
 	return tasks, nil
+}
+
+func CleanTask(ctx context.Context, pg wpg.Conn, quota config.Quota) error {
+	bookStmt := fmt.Sprintf(`
+		delete from 
+			book
+		where 
+			completed_at is null and
+			now() - created_at > Interval '%d days %d hours %d minutes %d seconds'
+	`,
+		quota.Day, quota.Hour, quota.Minute, quota.Second)
+
+	_, err := pg.Exec(ctx, bookStmt)
+	return err
 }

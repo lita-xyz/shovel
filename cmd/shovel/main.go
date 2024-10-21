@@ -155,6 +155,9 @@ func main() {
 	)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/records", wh.Records)
+	mux.HandleFunc("/offrampintents", wh.AvailableOffRamps)
+	mux.HandleFunc("/book", wh.Book)
+	mux.HandleFunc("/cancel", wh.Cancel)
 	// mux.HandleFunc("/", wh.Index)
 	// mux.HandleFunc("/diag", wh.Diag)
 	// mux.HandleFunc("/metrics", wh.Prom)
@@ -195,6 +198,13 @@ func main() {
 		fmt.Printf("startup error: %s\n", err)
 		os.Exit(1)
 	}
+
+	go func() {
+		for {
+			check(shovel.CleanTask(ctx, pg, conf.Clean))
+			time.Sleep(time.Minute * 100)
+		}
+	}()
 
 	switch profile {
 	case "cpu":

@@ -659,6 +659,7 @@ type Integration struct {
 	Event        Event
 	Block        []BlockData
 	Table        wpg.Table
+	Cross        []wpg.Cross
 	Notification Notification
 	filterAGG    string
 
@@ -684,12 +685,13 @@ const (
 	indexLog
 )
 
-func New(name string, ev Event, bd []BlockData, table wpg.Table, notif Notification, filterAGG string) (Integration, error) {
+func New(name string, ev Event, bd []BlockData, table wpg.Table, cross []wpg.Cross, notif Notification, filterAGG string) (Integration, error) {
 	ig := Integration{
 		name:         name,
 		Event:        ev,
 		Block:        bd,
 		Table:        table,
+		Cross:        cross,
 		Notification: notif,
 
 		filterAGG:   strings.ToLower(filterAGG),
@@ -835,6 +837,35 @@ func (ig Integration) Insert(ctx context.Context, pgmut *sync.Mutex, pg wpg.Conn
 	if err != nil {
 		return 0, err
 	}
+
+	for _, cross := range ig.Cross {
+		ref_idx := -1
+		for i, col := range ig.Columns {
+			if col == cross.RefCol {
+				ref_idx = i
+				break
+			}
+		}
+		if ref_idx == -1 {
+			return 0, fmt.Errorf("column %s not found in table %s", cross.RefCol, cross.CrossTable)
+		}
+		for _, row := range rows {
+			if cross.Task == "update" {
+				updateStmt := fmt.Sprintf(
+					"update %s set %s = now() where %s = %s",
+					cross.CrossTable,
+					cross.Col,
+					cross.RefCol,
+					row[ref_idx],
+				)
+				_, err = pg.Exec(ctx, updateStmt)
+				if err != nil {
+					return 0, err
+				}
+			}
+		}
+	}
+
 	if ig.numNotify == 0 {
 		return nr, nil
 	}
