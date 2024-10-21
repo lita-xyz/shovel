@@ -45,6 +45,7 @@ func union(a, b wpg.Table) wpg.Table {
 
 func Migrate(ctx context.Context, pg wpg.Conn, conf Root) error {
 	for _, ig := range conf.Integrations {
+		fmt.Println("migrating", ig.Name)
 		if err := ig.Table.Migrate(ctx, pg); err != nil {
 			return fmt.Errorf("migrating integration: %s: %w", ig.Name, err)
 		}
@@ -53,55 +54,8 @@ func Migrate(ctx context.Context, pg wpg.Conn, conf Root) error {
 }
 
 func DDL(conf Root) []string {
+
 	var tables = map[string]wpg.Table{}
-	// tables["offramp"] = wpg.Table{
-	// 	Name: "OffRamp",
-	// 	Columns: []wpg.Column{
-	// 		{Name: "from", Type: "bytea"},
-	// 		{Name: "offramp_id", Type: "bigint"},
-	// 		{Name: "paypal_id", Type: "text"},
-	// 		{Name: "offramp_amount", Type: "bigint"},
-	// 		{Name: "conversion_rate", Type: "bigint"},
-	// 		{Name: "tx_hash", Type: "bytea"},
-	// 		{Name: "block_num", Type: "bigint"},
-	// 	},
-	// }
-
-	// tables["onramp"] = wpg.Table{
-	// 	Name: "OnRamp",
-	// 	Columns: []wpg.Column{
-	// 		{Name: "from", Type: "bytea"},
-	// 		{Name: "to", Type: "bytea"},
-	// 		{Name: "onramp_addr", Type: "bytea"},
-	// 		{Name: "offramp_id", Type: "bigint"},
-	// 		{Name: "paypal_id", Type: "text"},
-	// 		{Name: "amount", Type: "bigint"},
-	// 		{Name: "feeAmount", Type: "bigint"},
-	// 		{Name: "tx_hash", Type: "bytea"},
-	// 		{Name: "block_num", Type: "bigint"},
-	// 	},
-	// 	ForeignKeys: []wpg.ForeignKey{{Col: "offramp_id", RefCol: "offramp_id", RefTable: "OffRamp"}},
-	// }
-
-	// tables["book"] = wpg.Table{
-	// 	Name: "Book",
-	// 	Columns: []wpg.Column{
-	// 		{Name: "offramp_id", Type: "bigint"},
-	// 		{Name: "created_at", Type: "timestamp"},
-	// 		{Name: "completed_at", Type: "timestamp"},
-	// 	},
-	// 	ForeignKeys: []wpg.ForeignKey{{Col: "offramp_id", RefCol: "offramp_id", RefTable: "OffRamp"}},
-	// }
-
-	// tables["withdraw"] = wpg.Table{
-	// 	Name: "Book",
-	// 	Columns: []wpg.Column{
-	// 		{Name: "offramp_id", Type: "bigint"},
-	// 		{Name: "created_at", Type: "timestamp"},
-	// 		{Name: "completed_at", Type: "timestamp"},
-	// 	},
-	// 	ForeignKeys: []wpg.ForeignKey{{Col: "offramp_id", RefCol: "offramp_id", RefTable: "OffRamp"}},
-	// }
 
 	for i := range conf.Integrations {
 		nt := conf.Integrations[i].Table

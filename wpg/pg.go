@@ -128,6 +128,12 @@ func (t Table) DDL() []string {
 
 	for _, fkey := range t.ForeignKeys {
 		createFK := fmt.Sprintf(
+			"alter table %s drop constraint if exists f_%s",
+			t.Name,
+			fkey.Col,
+		)
+		res = append(res, createFK)
+		createFK = fmt.Sprintf(
 			"alter table %s add constraint f_%s foreign key (%s) references %s(%s)",
 			t.Name,
 			fkey.Col,
