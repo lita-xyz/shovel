@@ -22,6 +22,7 @@ type Root struct {
 	PGURL        string        `json:"pg_url"`
 	Sources      []Source      `json:"eth_sources"`
 	Integrations []Integration `json:"integrations"`
+	Additional   []wpg.Table   `json:"additional"`
 }
 
 func union(a, b wpg.Table) wpg.Table {
@@ -48,6 +49,12 @@ func Migrate(ctx context.Context, pg wpg.Conn, conf Root) error {
 		fmt.Println("migrating", ig.Name)
 		if err := ig.Table.Migrate(ctx, pg); err != nil {
 			return fmt.Errorf("migrating integration: %s: %w", ig.Name, err)
+		}
+	}
+	for _, table := range conf.Additional {
+		fmt.Println("migrating", table.Name)
+		if err := table.Migrate(ctx, pg); err != nil {
+			return fmt.Errorf("migrating integration: %s: %w", table.Name, err)
 		}
 	}
 	return nil
