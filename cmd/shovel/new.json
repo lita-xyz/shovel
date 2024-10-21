@@ -1,0 +1,177 @@
+{
+    "pg_url": "postgres:///shovel",
+    "eth_sources": [
+      {
+          "name": "local",
+          "chain_id": 31337,
+          "urls": ["http://127.0.0.1:8545"]
+      }
+    ],
+    "integrations": [
+    {   
+        "enabled": true,
+        "name": "off_ramp_intents",
+        "sources": [{ "name": "local" }],
+        "table": {
+            "name": "off_ramp_intents",
+            "disable_unique": false,
+            "columns": [
+                { "name": "off_ramp_intent_id", "type": "numeric" },
+                { "name": "user", "type": "bytea" },
+                { "name": "paypal_id", "type": "text" },
+                { "name": "off_ramp_amount", "type": "numeric" },
+                { "name": "conversion_rate", "type": "numeric" },
+                { "name": "tx_hash", "type": "bytea"},
+                { "name": "log_addr", "type": "bytea" }
+            ],
+            "unique": [
+                ["off_ramp_intent_id"],
+                ["tx_hash"]
+            ]
+        },
+        "block": [
+          { "name": "tx_hash", "column": "tx_hash" },
+          {
+            "name": "log_addr",
+            "column": "log_addr",
+            "filter_op": "contains",
+            "filter_arg": [ "" ]
+          }
+        ],
+        "event": {
+          "type": "event",
+          "name": "OffRampIntentCreated",
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "offRampIntentID",
+              "type": "uint256",
+              "column": "off_ramp_intent_id"
+            },
+            { "indexed": true, "name": "user", "type": "address", "column": "user" },
+            {
+              "indexed": false,
+              "name": "paypalID",
+              "type": "string",
+              "column": "paypal_id"
+            },
+            {
+              "indexed": false,
+              "name": "offRampAmount",
+              "type": "uint256",
+              "column": "off_ramp_amount"
+            },
+            {
+              "indexed": false,
+              "name": "conversionRate",
+              "type": "uint256",
+              "column": "conversion_rate"
+            }
+          ]
+        }
+    },
+    {
+        "enabled": true,
+        "name": "on_ramp_intents_verified",
+        "sources": [{ "name": "local"}],
+        "table": {
+            "name": "on_ramp_intents_verified",
+            "columns": [
+              { "name": "off_ramp_intent_id", "type": "numeric" },
+              { "name": "off_ramper_address", "type": "bytea" },
+              { "name": "on_ramper_address", "type": "bytea" },
+              { "name": "to_address", "type": "bytea" },
+              { "name": "amount", "type": "numeric" },
+              { "name": "fee_amount", "type": "numeric" },
+              { "name": "tx_hash", "type": "bytea"},
+              { "name": "log_addr", "type": "bytea" }
+            ],
+            "unique": [
+              ["tx_hash"]
+            ],
+            "foreign_key": [
+              { "ref_col": "off_ramp_intent_id", "col": "off_ramp_intent_id", "ref_table": "off_ramp_intents" }
+            ]
+        },
+        "block": [
+          { "name": "tx_hash", "column": "tx_hash" },
+          {
+            "name": "log_addr",
+            "column": "log_addr",
+            "filter_op": "contains",
+            "filter_arg": [ "" ]
+          }
+        ],
+        "event": {
+          "type": "event",
+          "name": "OnRampIntentVerified",
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "offRampIntentID",
+              "type": "uint256",
+              "column": "off_ramp_intent_id"
+            },
+            {
+              "indexed": true,
+              "name": "offRamperAddress",
+              "type": "address",
+              "column": "off_ramper_address"
+            },
+            {
+              "indexed": true,
+              "name": "onRamperAddress",
+              "type": "address",
+              "column": "on_ramper_address"
+            },
+            { "indexed": false, "name": "to", "type": "address", "column": "to_address" },
+            { "indexed": false, "name": "amount", "type": "uint256", "column": "amount" },
+            {
+              "indexed": false,
+              "name": "feeAmount",
+              "type": "uint256",
+              "column": "fee_amount"
+            }
+          ]
+        },
+        "cross": [
+            { "cross_table": "book", "col": "completed_at", "task": "update", "ref_col": "off_ramp_intent_id" }
+        ]
+    }],
+    "additional": [
+        {
+            "name": "book",
+            "columns": [
+                { "name": "off_ramp_intent_id", "type": "numeric" },
+                { "name": "created_at", "type": "timestamp" },
+                { "name": "completed_at", "type": "timestamp" }
+            ],
+            "unique": [
+                ["off_ramp_intent_id"]
+            ],
+            "foreign_key": [
+                { "ref_col": "off_ramp_intent_id", "col": "off_ramp_intent_id", "ref_table": "off_ramp_intents" }
+            ]
+        },
+        {
+            "name": "withdraw",
+            "columns": [
+                { "name": "off_ramp_intent_id", "type": "numeric" },
+                { "name": "created_at", "type": "timestamp" },
+                { "name": "completed_at", "type": "timestamp" }
+            ],
+            "unique": [
+                ["off_ramp_intent_id"]
+            ],
+            "foreign_key": [
+                { "ref_col": "off_ramp_intent_id", "col": "off_ramp_intent_id", "ref_table": "off_ramp_intents" }
+            ]
+        }
+    ],
+    "clean": {
+        "day": 1,
+        "hour": 0,
+        "minute": 0
+    }
+}
+  
