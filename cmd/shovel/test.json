@@ -19,7 +19,6 @@
       "table": {
         "name": "ramping",
         "columns": [
-          {"name": "chain_id", "type": "numeric"},
           {"name": "log_addr", "type": "bytea"},
           {"name": "block_time", "type": "numeric"},
           {"name": "tx_hash", "type": "bytea"},
@@ -31,7 +30,6 @@
         ]
       },
       "block": [
-        {"name": "chain_id", "column": "chain_id"},
         {"name": "block_time", "column": "block_time"},
         {"name": "tx_hash", "column": "tx_hash"},
         {
@@ -51,6 +49,40 @@
           {"name": "amount", "type": "uint256", "column": "value"},
           {"name": "status", "type": "bool", "column": "status"},
           {"name": "type", "type": "bool", "column": "type"}
+        ]
+      }
+    }, 
+    {
+      "name": "registration",
+      "enabled": true,
+      "sources": [{"name": "Sepolia"}, {"name": "Holesky"}],
+      "table": {
+        "name": "registration",
+        "columns": [
+          {"name": "log_addr", "type": "bytea"},
+          {"name": "block_time", "type": "numeric"},
+          {"name": "tx_hash", "type": "bytea"},
+          {"name": "user", "type": "bytea"},
+          {"name": "success", "type": "bool"}        
+        ]
+      },
+      "block": [
+        {"name": "block_time", "column": "block_time"},
+        {"name": "tx_hash", "column": "tx_hash"},
+        {
+          "name": "log_addr",
+          "column": "log_addr",
+          "filter_op": "contains",
+          "filter_arg": []  
+        }
+      ],
+      "event": {
+        "name": "UserRegisteredInOrchestrator",
+        "type": "event",
+        "anonymous": false,
+        "inputs": [
+          {"indexed": true, "name": "user", "type": "address", "column": "from"},
+          {"name": "success", "type": "bool", "column": "success"}
         ]
       }
     }]

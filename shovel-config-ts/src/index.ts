@@ -17,7 +17,11 @@ export type PGColumnType =
   | "int"
   | "numeric"
   | "smallint"
-  | "text";
+  | "text"
+  | "timestamp";
+
+export type CrossAction = 
+  | "update"
 
 export type Column = {
   name: string;
@@ -31,10 +35,20 @@ export type Column = {
  */
 export type IndexStatment = string[];
 
+export type UniqueStatement = string[];
+
+export type ForeignKeyStatement = {
+    ref_col: string;
+    col: string;
+    ref_table: string;
+}
+
 export type Table = {
   name: string;
   columns: Column[];
   index?: IndexStatment[];
+  unique?: UniqueStatement[];
+  foreign_key?: ForeignKeyStatement[];
 };
 
 export type FilterOp = "contains" | "!contains";
@@ -148,6 +162,13 @@ export type Notification = {
 	columns: string[];
 };
 
+export type Cross = {
+  cross_table: string;
+  col: string;
+  task: CrossAction;
+  ref_col: string;
+};
+
 export type Integration = {
   name: string;
   enabled: boolean;
@@ -156,6 +177,7 @@ export type Integration = {
   notification?: Notification;
   block?: BlockData[];
   event?: Event;
+  cross?: Cross[];
 };
 
 export type Dashboard = {
@@ -164,11 +186,19 @@ export type Dashboard = {
   disable_authn?: EnvRef | boolean;
 };
 
+export type Clean = {
+  days: number;
+  hours: number;
+  minutes: number;
+}
+
 export type Config = {
   dashboard: Dashboard;
   pg_url: string;
   sources: Source[];
   integrations: Integration[];
+  additional?: Table[];
+  clean: Clean;
 };
 
 export function makeConfig(args: {
@@ -176,6 +206,8 @@ export function makeConfig(args: {
   pg_url: string;
   sources: Source[];
   integrations: Integration[];
+  additional?: Table[];
+  clean: Clean
 }): Config {
   //TODO validation
   return {
@@ -183,6 +215,8 @@ export function makeConfig(args: {
     pg_url: args.pg_url,
     sources: args.sources,
     integrations: args.integrations,
+    additional: args.additional,
+    clean: args.clean
   };
 }
 
@@ -200,6 +234,8 @@ export function toJSON(c: Config, space: number = 0): string {
       pg_url: c.pg_url,
       eth_sources: c.sources,
       integrations: c.integrations,
+      additional: c.additional,
+      clean: c.clean
     },
     bigintjson,
     space

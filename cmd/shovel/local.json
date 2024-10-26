@@ -14,7 +14,6 @@
       "table": {
         "name": "escrow",
         "columns": [
-          {"name": "chain_id", "type": "numeric"},
           {"name": "log_addr", "type": "bytea"},
           {"name": "block_time", "type": "numeric"},
           {"name": "to", "type": "bytea"},
@@ -22,7 +21,6 @@
         ]
       },
       "block": [
-        {"name": "chain_id", "column": "chain_id"},
         {"name": "block_time", "column": "block_time"},
         {
           "name": "log_addr",
@@ -48,7 +46,6 @@
       "table": {
         "name": "intent",
         "columns": [
-          {"name": "chain_id", "type": "numeric"},
           {"name": "log_addr", "type": "bytea"},
           {"name": "block_time", "type": "numeric"},
           {"name": "from", "type": "bytea"},
@@ -56,7 +53,6 @@
         ]
       },
       "block": [
-        {"name": "chain_id", "column": "chain_id"},
         {"name": "block_time", "column": "block_time"},
         {
           "name": "log_addr",
@@ -82,7 +78,6 @@
       "table": {
         "name": "release",
         "columns": [
-          {"name": "chain_id", "type": "numeric"},
           {"name": "log_addr", "type": "bytea"},
           {"name": "block_time", "type": "numeric"},
           {"name": "from", "type": "bytea"},
@@ -91,7 +86,6 @@
         ]
       },
       "block": [
-        {"name": "chain_id", "column": "chain_id"},
         {"name": "block_time", "column": "block_time"},
         {
           "name": "log_addr",
@@ -111,5 +105,5 @@
         ]
       }
     }]
-  }
+}
   
